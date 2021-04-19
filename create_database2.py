@@ -16,8 +16,8 @@ old_datasets_location = re.sub(r"\\", "/", old_datasets_location)
 new_datasets_location = re.sub(r"\\", "/", new_datasets_location)
 
 dataset_field_names = ['tweet_id', 'username', 'user_followers_count', 'coordinates', 'datetime', 'location', 'raw_text', 'sentiment_score']
-location_list = ['United States', 'United Kingdom', 'Australia', 'India', 'Canada', 'Nigeria', 'Kenya']
-mask_synonyms = ['mask', 'masks', 'wearamask', 'wear a mask', 'wearmask', 'wear mask', 'face shield', 'faceshield', 'masks4all', 'mask for all', 'masks for all']
+location_list = settings.countries_list
+mask_synonyms = settings.mask_synonyms
 
 saved_tweets = []
 merged_file_info = None

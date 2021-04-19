@@ -8,41 +8,31 @@ import nltk
 from nltk.corpus import stopwords
 
 nltk.download('stopwords')
+dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project_2\IEEE_Dataset\refactored_datasets\v2'
+dir_path = re.sub(r'\\', '/', dir_path)
 
 # Number of sentiment scores per country (seperate bar plots)
 def code1():
     sentiments = {}
 
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
 
         df = pd.read_csv(dir_path + '/' + filename)
-        country = filename[4:][:-11]
-        sentiments[country] = np.array(df.model_output)
+        country = filename[4:][:-13]
+        sentiments[country] = np.array([float(sentiment[1:-1]) for sentiment in df.model_output])
+        sentiments[country] = np.around((sentiments[country] + 1) * 5 / 2, decimals=0)
         plt.figure(i)
         plt.title(country)
-        opinions = np.array([sentiments[country].tolist().count(i) for i in range(1,11)])
+        opinions = np.array([sentiments[country].tolist().count(i) for i in np.arange(0, 6, 1)])
+        opinions_percentage = opinions / sum(opinions) * 100
         plt.xlabel('Sentiment Score')
         plt.ylabel('Percentage of Tweets')
-        #b0 = np.sum(opinions[:1])
-        #b1 = np.sum(opinions[1:4])
-        #b2 = np.sum(opinions[4:5])
-        #b3 = np.sum(opinions[5:9])
-        #b4 = np.sum(opinions[9:])
-        #plt.bar(np.arange(1,6,1).tolist(), np.array([b0,b1,b2, b3, b4])/len(sentiments[country])*100)
-        plt.bar(np.arange(1,11,1).tolist(), opinions/len(sentiments[country])*100)
+        plt.bar(np.arange(0, 6, 1).tolist(), opinions_percentage)
         plt.show()
 
-        print(country)
-        print(np.var(sentiments[country]))
-        print(np.mean(sentiments[country]))
-        print(opinions)
-
-# Most frequent word
+# Most frequent words
 def code2():
     mask_synonyms = ['mask', 'masks', 'wearamask', 'wear a mask', 'wearmask', 'wear mask', 'face shield',
                      'faceshield', 'masks4all', 'mask for all', 'masks for all']
@@ -103,31 +93,28 @@ def code2():
         return filtered_aspects
 
 
-
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     positive_words = {}
     negative_words = {}
 
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
 
         df = pd.read_csv(dir_path + '/' + filename)
 
-        country = filename[4:][:-11]
+        country = filename[4:][:-13]
         positive_words[country] = []
         negative_words[country] = []
 
         for index, row in df.iterrows():
             sent_score = row.model_output
-            if sent_score >= 6:
+            sent_score = round((float(sent_score[1:-1]) + 1) * 5 / 2, 1)
+            if sent_score >= 2.5:
                 #positive_words[country]+=get_words(row.raw_text)
                 aspects = parse_aspect(row.aspects)
                 filtered_aspects = filter_aspects(aspects)
                 positive_words[country]+=filtered_aspects
-            elif sent_score <= 4:
+            elif sent_score <= 2.5:
                 aspects = parse_aspect(row.aspects)
                 filtered_aspects = filter_aspects(aspects)
                 #negative_words[country]+=get_words(row.raw_text)
@@ -160,22 +147,17 @@ def code2():
         ax2.bar(most_pop_words_keys_neg, most_pop_words_vals_neg)
         plt.show()
 
-        print("h")
-
 # Number of tweets with #wearamask
 def code3():
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     wearamask = {}
     total = {}
 
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
         df = pd.read_csv(dir_path + '/' + filename)
 
-        country = filename[4:][:-11]
+        country = filename[4:][:-13]
         wearamask[country] = 0
         total[country] = 0
 
@@ -191,34 +173,29 @@ def code3():
     plt.figure(i)
     plt.title('Tweets with #wearamask')
     plt.xlabel("Country Code")
-    plt.ylabel("Percentage of tweets")
+    plt.ylabel("Percentage of total tweets")
     abbreviations_of_countries = ['AU', 'CA', 'IN', 'NG', 'UK', 'US']
     plt.bar(abbreviations_of_countries, list(wearamask.values()))
     plt.show()
 
-    print("h")
-
 # Correlation of model_output and number of followers
 def code4():
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     scores = {}
 
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
         df = pd.read_csv(dir_path + '/' + filename)
 
-        country = filename[4:][:-11]
+        country = filename[4:][:-13]
         scores[country] = {}
 
         for index, row in df.iterrows():
             n_fol = row.user_followers_count
-            sent = row.model_output
+            sent = round((float(row.model_output[1:-1]) + 1) * 5 / 2)
             scores[country][sent] = scores[country][sent]+n_fol if sent in scores[country].keys() else n_fol
 
-        for i in range(1,11):
+        for i in range(1,6):
             if i not in scores[country]:
                 scores[country][i] = 0
 
@@ -228,16 +205,14 @@ def code4():
         plt.title('Correlation between number of followers and sentiment scores of users in ' + country_name)
         plt.xlabel("Sentiment score")
         plt.ylabel("Total number of followers")
-        followers = [scores[country][i] for i in range(1,11)]
+        followers = [scores[country][i] for i in range(1,6)]
         d = {i+1: f for i, f in enumerate(followers)}
         print(d)
-        print("WEIGHTED SENT.SCORE:")
+        print(f"WEIGHTED SENT.SCORE for {country_name}:")
         print(sum([k*v for k,v in d.items()])/sum([v for k,v in d.items()]))
-        plt.xticks(np.arange(1,11,step=1))
-        plt.bar(np.arange(1,11,1), followers)
+        plt.xticks(np.arange(1,6,step=1))
+        plt.bar(np.arange(1,6,1), followers)
         plt.show()
-
-        print("h")
 
 # What is the most popular #
 def code5():
@@ -249,18 +224,15 @@ def code5():
                 hashes.append(word)
         return hashes
 
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     most_pop_hash = {}
 
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
 
         df = pd.read_csv(dir_path + '/' + filename)
 
-        country = filename[4:][:-11]
+        country = filename[4:][:-13]
         most_pop_hash[country] = {}
 
         for index, row in df.iterrows():
@@ -276,7 +248,7 @@ def code5():
         plt.figure(i)
         plt.title('Tweets with #wearamask')
         plt.xlabel("Country Code")
-        plt.ylabel("Percentage of tweets")
+        plt.ylabel("Percentage of total tweets")
         abbreviations_of_countries = ['AU', 'CA', 'IN', 'KE', 'NG', 'UK', 'US']
         #plt.bar(abbreviations_of_countries, list(most_pop_hash[country].values()))
         #plt.show()
@@ -294,19 +266,15 @@ def code5():
 
 # Count number of different users
 def code6():
-
-    dir_path = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
-    dir_path = re.sub(r'\\', '/', dir_path)
-
     users = {}
 
     for i, filename in enumerate(os.listdir(dir_path)):
-        if not filename.endswith('10.csv'):
+        if not filename.endswith('5_v2.csv'):
             continue
 
         df = pd.read_csv(dir_path + '/' + filename)
 
-        country = filename[4:][:-11]
+        country = filename[4:][:-13]
         users[country] = set()
 
         for index, row in df.iterrows():
@@ -317,5 +285,22 @@ def code6():
 
     print(users)
 
+# Calculate mean and variance
+def code7():
+    sentiments = {}
+
+    for i, filename in enumerate(os.listdir(dir_path)):
+        if not filename.endswith('5_v2.csv'):
+            continue
+
+        df = pd.read_csv(dir_path + '/' + filename)
+        country = filename[4:][:-13]
+        sentiments[country] = np.array([float(sentiment[1:-1]) for sentiment in df.model_output])
+        sentiments[country] = np.around((sentiments[country] + 1) * 5 / 2, decimals=0)
+        mean = sentiments[country].mean()
+        variance = sentiments[country].var()
+
+        print(country, mean, variance)
+
 if __name__=='__main__':
-    code3()
+    code4()

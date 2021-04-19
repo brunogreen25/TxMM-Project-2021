@@ -1,5 +1,4 @@
 import preprocessing
-#import spacy
 import time
 from nltk.corpus import wordnet
 import nltk
@@ -8,14 +7,13 @@ import os
 import re
 import pandas as pd
 import json
+import settings
 
-#stanza.download('en')
-
-datasets_location = r'C:\Users\sluzb\Documents\Fakultet\Radboud\Semester 1\Text And Multimedia Mining\Project\Code\IEEE_Dataset\refactored_datasets'
+datasets_location = settings.refactored_dataset_location
 datasets_location = re.sub(r"\\", "/", datasets_location)
 
 nlp = stanza.Pipeline('en')
-mask_synonyms = ['mask', 'masks', 'wearamask', 'wear a mask', 'wearmask', 'wear mask', 'face shield', 'faceshield', 'masks4all', 'mask for all', 'masks for all']
+mask_synonyms = settings.mask_synonyms_list
 mask_synonyms_nlp = nlp(' '.join(mask_synonyms))
 
 # Join features of one instance (where nouns are next to each other)
@@ -62,7 +60,7 @@ def get_relations(sentence, tagged_sentence):
             if dep[1] != 0:
                 dependencies[i][1] = sentence[dep[1] - 1]
     except:
-        print("H")
+        print("Error")
 
     return dependencies
 
@@ -136,8 +134,6 @@ def get_aspect(data):
     return cluster
 
 if __name__ == '__main__':
-    # Test
-    data = 'Indoor changes! Wear your mask. Gotta do it! Keep others safe, keep yourself safe... #ðŸ˜· #love_mask'
 
     # Iterate all datasets
     files = os.listdir(datasets_location)
@@ -168,6 +164,3 @@ if __name__ == '__main__':
         df['aspects'] = new_column['aspect_terms']
         df.to_csv(new_file_path, index=False)
         print(filename + " saved")
-
-
-

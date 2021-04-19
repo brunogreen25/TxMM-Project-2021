@@ -4,10 +4,9 @@ import os
 import json
 import geocoder
 import csv
-# STREAM API
 
 dataset_field_names = ['tweet_id', 'username', 'location', 'text']
-location_list = ['United States', 'United Kingdom', 'Australia', 'India', 'Canada', 'Nigeria', 'Kenya']
+location_list = settings.countries_list
 data_instances = list()
 counter = dict()
 ram_counter = 0
@@ -32,13 +31,10 @@ def create_counter(thresh_total_instances):
         if counter[location] >= thresh_total_instances:
             location_list.remove(location)
 
-
-
 # Creates headers to send
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
-
 
 # Gets rules whcih are currently stored on the server
 def get_rules(headers):
@@ -51,7 +47,6 @@ def get_rules(headers):
         )
     print("Downloaded server-stored rules")
     return response.json()
-
 
 # Deletes rules which are currently stored on the server
 def delete_all_rules(headers, rules):
@@ -72,7 +67,6 @@ def delete_all_rules(headers, rules):
             )
         )
     print("Deleted server-stored rules")
-
 
 # Sets new rules to the server
 def set_rules(headers):
@@ -106,10 +100,9 @@ def get_tweet(json_response, headers):
         headers=headers
     )
     if response.status_code != 200:
-        return False
-        #raise Exception(
-        #    "Cannot get stream (HTTP {}): {}".format(response.status_code, response.text)
-        #)
+        raise Exception(
+            "Cannot get stream (HTTP {}): {}".format(response.status_code, response.text)
+        )
     resp = response.json()
     # print(json.dumps(resp, indent=4, sort_keys=True))
 
